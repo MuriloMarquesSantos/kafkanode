@@ -4,22 +4,25 @@ import routes from './routes';
 
 const app = express();
 
-app.use(routes);
-
 const kafka = new Kafka({
     clientId: 'api',
-    brokers: ['kafka:9092']
+    brokers: ['localhost:9092']
 })
 const producer = kafka.producer();
+const consumer = kafka.consumer({ groupId: 'test-group' });
 
-app.use((req, res, next) => {
-    req.producer = producer;
+app.use((request, response, next) => {
+    request.producer = producer;
+    request.consumer = consumer;
 
     return next();
 })
 
+app.use(routes);
+
 async function run() {
-    // await producer.connect();
+    await producer.connect();
+    console.log("connected")
 
     app.listen(3333);
 }
