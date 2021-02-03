@@ -4,16 +4,16 @@ import routes from './routes';
 
 const app = express();
 
+app.use(express.json())
+
 const kafka = new Kafka({
     clientId: 'api',
     brokers: ['localhost:9092']
 })
 const producer = kafka.producer();
-const consumer = kafka.consumer({ groupId: 'test-group' });
 
 app.use((request, response, next) => {
     request.producer = producer;
-    request.consumer = consumer;
 
     return next();
 })
@@ -28,4 +28,3 @@ async function run() {
 }
 
 run().catch(console.error);
-

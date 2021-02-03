@@ -4,28 +4,21 @@ const routes = Router();
 
 routes.post('/certificates', async (request, response) => {
     const producer = request.producer;
-    const consumer = request.consumer;
-    console.log(request.producer);
-    console.log(request.consumer);
-    await producer.send({
+    const requestData = JSON.stringify(request.body)
+    const messageResponse = await producer.send({
         topic: 'test-topic',
         messages: [
-            { value: 'Hello KafkaJS user!' },
+            { value: requestData },
         ],
     })
-    await producer.disconnect()
 
-    await consumer.connect()
-    await consumer.subscribe({ topic: 'test-topic', fromBeginning: true })
+    console.log(messageResponse)
 
-    await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-            console.log({
-                value: message.value.toString(),
-            })
-        },
-    })
-    return response.status(200).json({ ok: "true" });
+    return response
+        .status(200)
+        .json(
+            `Message posted in ${messageResponse[0].topicName} at position ${messageResponse[0].baseOffset}`
+        );
 })
 
 export default routes;
